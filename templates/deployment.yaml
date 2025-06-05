@@ -16,6 +16,14 @@ spec:
         - name: drupal
           image: "{{ .Values.drupal.image.repository }}:{{ .Values.drupal.image.tag }}"
           imagePullPolicy: {{ .Values.drupal.image.pullPolicy }}
+          volumeMounts:
+            {{- if .Values.drupal.persistence.enabled }}
+            - name: drupal-data
+              mountPath: /opt/drupal/web/sites/default/files
+              {{- if .Values.drupal.persistence.subPath }}
+              subPath: {{ .Values.drupal.persistence.subPath }}
+              {{- end }}
+            {{- end }}
           env:
             - name: DRUPAL_DATABASE_HOST
               value: {{ .Values.database.host | default (printf "%s-mysql" .Release.Name) | quote }}
@@ -52,3 +60,14 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.drupal.resources | nindent 12 }}
+      volumes:
+        {{- if .Values.drupal.persistence.enabled }}
+        - name: drupal-data
+          {{- if .Values.drupal.persistence.existingClaim }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.drupal.persistence.existingClaim }}
+          {{- else }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-drupal
+          {{- end }}
+        {{- end }}

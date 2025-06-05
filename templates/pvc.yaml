@@ -1,0 +1,17 @@
+{{- if and .Values.drupal.persistence.enabled (not .Values.drupal.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-drupal
+  labels:
+    app: {{ .Release.Name }}-drupal
+spec:
+  accessModes:
+    - {{ .Values.drupal.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.drupal.persistence.size | quote }}
+  {{- if .Values.drupal.persistence.storageClass }}
+  storageClassName: {{ .Values.drupal.persistence.storageClass | quote }}
+  {{- end }}
+{{- end }}

@@ -12,6 +12,15 @@ drupal:
     requests:
       cpu: 500m
       memory: 512Mi
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    # Existing PVC to use (must be in the same namespace)
+    existingClaim: ""
+    # Subdirectory of the volume to mount
+    subPath: ""
 
 # Database Configuration
 database:
