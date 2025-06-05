@@ -1,0 +1,42 @@
+# Drupal Configuration
+drupal:
+  image:
+    repository: drupal
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+# Database Configuration
+database:
+  type: mysql  # or postgresql
+  host: ""
+  port: 3306
+  name: drupal
+  username: drupal
+  password: ""
+  # If using external database, set enabled to false
+  internal:
+    enabled: true
+    image:
+      repository: mysql
+      tag: 8.0
+    persistence:
+      enabled: true
+      size: 8Gi
+
+# SMTP Configuration
+smtp:
+  enabled: false
+  host: ""
+  port: 587
+  username: ""
+  password: ""
+  protocol: "tls"  # tls, ssl, or none
+  from_address: ""

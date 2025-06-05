@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-drupal
+spec:
+  replicas: {{ .Values.drupal.replicaCount }}
+  selector:
+    matchLabels:
+      app: drupal
+  template:
+    metadata:
+      labels:
+        app: drupal
+    spec:
+      containers:
+        - name: drupal
+          image: "{{ .Values.drupal.image.repository }}:{{ .Values.drupal.image.tag }}"
+          imagePullPolicy: {{ .Values.drupal.image.pullPolicy }}
+          env:
+            - name: DRUPAL_DATABASE_HOST
+              value: {{ .Values.database.host | default (printf "%s-mysql" .Release.Name) | quote }}
+            - name: DRUPAL_DATABASE_PORT
+              value: {{ .Values.database.port | quote }}
+            - name: DRUPAL_DATABASE_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DRUPAL_DATABASE_USERNAME
+              value: {{ .Values.database.username | quote }}
+            - name: DRUPAL_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-drupal-secret
+                  key: db-password
+            {{- if .Values.smtp.enabled }}
+            - name: SMTP_HOST
+              value: {{ .Values.smtp.host | quote }}
+            - name: SMTP_PORT
+              value: {{ .Values.smtp.port | quote }}
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-drupal-secret
+                  key: smtp-username
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-drupal-secret
+                  key: smtp-password
+            - name: SMTP_PROTOCOL
+              value: {{ .Values.smtp.protocol | quote }}
+            - name: SMTP_FROM
+              value: {{ .Values.smtp.from_address | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.drupal.resources | nindent 12 }}
